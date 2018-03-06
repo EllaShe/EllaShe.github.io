@@ -4398,7 +4398,7 @@
 
   _export(_export.S, 'Math', { fround: _mathFround });
 
-  // 20.2.2.17 Math.hypot([value1[, value2[, � ]]])
+  // 20.2.2.17 Math.hypot([value1[, value2[, … ]]])
 
   const abs$1 = Math.abs;
 
@@ -5569,27 +5569,27 @@
    * Default config for WanaKana, user passed options will be merged with these
    * @type {DefaultOptions}
    * @name defaultOptions
-   * @property {Boolean} [useObsoleteKana=false] - Set to true to use obsolete characters, such as ? and ?.
+   * @property {Boolean} [useObsoleteKana=false] - Set to true to use obsolete characters, such as ゐ and ゑ.
    * @example
    * toHiragana('we', { useObsoleteKana: true })
-   * // => '?'
+   * // => 'ゑ'
    * @property {Boolean} [passRomaji=false] - Set to true to pass romaji when using mixed syllabaries with toKatakana() or toHiragana()
    * @example
-   * toHiragana('only convert the katakana: ????', { passRomaji: true })
-   * // => "only convert the katakana: ????"
+   * toHiragana('only convert the katakana: ヒラガナ', { passRomaji: true })
+   * // => "only convert the katakana: ひらがな"
    * @property {Boolean} [upcaseKatakana=false] - Set to true to convert katakana to uppercase using toRomaji()
    * @example
-   * toRomaji('???? ????', { upcaseKatakana: true })
+   * toRomaji('ひらがな カタカナ', { upcaseKatakana: true })
    * // => "hiragana KATAKANA"
    * @property {Boolean|String} [IMEMode=false] - Set to true, 'toHiragana', or 'toKatakana' to handle conversion while it is being typed.
    * @property {String} [romanization='hepburn'] - choose toRomaji() romanization map (currently only 'hepburn')
    * @property {Object} [customKanaMapping] - custom map will be merged with default conversion
    * @example
-   * toKana('wanakana', { customKanaMapping: { na: '?', ka: 'Bana' }) };
-   * // => '??Bana?'
+   * toKana('wanakana', { customKanaMapping: { na: 'に', ka: 'Bana' }) };
+   * // => 'わにBanaに'
    * @property {Object} [customRomajiMapping] - custom map will be merged with default conversion
    * @example
-   * toRomaji('????', { customRomajiMapping: { ?: 'zi', ?: 'tu', ?: 'li' }) };
+   * toRomaji('つじぎり', { customRomajiMapping: { じ: 'zi', つ: 'tu', り: 'li' }) };
    * // => 'tuzigili'
    */
   const DEFAULT_OPTIONS = {
@@ -5658,14 +5658,14 @@
 
   const MODERN_ENGLISH = [0x0000, 0x007f];
   const HEPBURN_MACRON_RANGES = [
-    [0x0100, 0x0101], // A a
-    [0x0112, 0x0113], // E e
-    [0x012a, 0x012b], // I i
-    [0x014c, 0x014d], // O o
+    [0x0100, 0x0101], // Ā ā
+    [0x0112, 0x0113], // Ē ē
+    [0x012a, 0x012b], // Ī ī
+    [0x014c, 0x014d], // Ō ō
     [0x016a, 0x016b],
   ];
   const SMART_QUOTE_RANGES = [
-    [0x2018, 0x2019], // � �
+    [0x2018, 0x2019], // ‘ ’
     [0x201c, 0x201d],
   ];
 
@@ -5693,24 +5693,24 @@
   }
 
   /**
-   * Test if `input` only includes [Kanji](https://en.wikipedia.org/wiki/Kanji), [Kana](https://en.wikipedia.org/wiki/Kana), zenkaku numbers, and JA punctuation/symbols.�
+   * Test if `input` only includes [Kanji](https://en.wikipedia.org/wiki/Kanji), [Kana](https://en.wikipedia.org/wiki/Kana), zenkaku numbers, and JA punctuation/symbols.”
    * @param  {String} [input=''] text
    * @param  {Regexp} [allowed] additional test allowed to pass for each char
    * @return {Boolean} true if passes checks
    * @example
-   * isJapanese('???')
+   * isJapanese('泣き虫')
    * // => true
-   * isJapanese('??')
+   * isJapanese('あア')
    * // => true
-   * isJapanese('2?') // Zenkaku numbers allowed
+   * isJapanese('２月') // Zenkaku numbers allowed
    * // => true
-   * isJapanese('????!?$') // Zenkaku/JA punctuation
+   * isJapanese('泣き虫。！〜＄') // Zenkaku/JA punctuation
    * // => true
-   * isJapanese('???.!~$') // Latin punctuation fails
+   * isJapanese('泣き虫.!~$') // Latin punctuation fails
    * // => false
-   * isJapanese('A???')
+   * isJapanese('A泣き虫')
    * // => false
-   * isJapanese('�???�', /[��]/);
+   * isJapanese('≪偽括弧≫', /[≪≫]/);
    * // => true
    */
   function isJapanese() {
@@ -5788,8 +5788,8 @@
     return newChunk(string, 0);
   }
 
-  // transform the tree, so that for example hepburnTree['?']['?'][''] === 'va'
-  // or kanaTree['k']['y']['a'][''] === '??'
+  // transform the tree, so that for example hepburnTree['ゔ']['ぁ'][''] === 'va'
+  // or kanaTree['k']['y']['a'][''] === 'きゃ'
   function transform(tree) {
     return Object.entries(tree).reduce((map, _ref) => {
       let _ref2 = slicedToArray(_ref, 2),
@@ -5814,12 +5814,12 @@
   /**
    * Creates a custom mapping tree, returns a function that accepts a defaultMap which the newly created customMapping will be merged with and returned
    * (customMap) => (defaultMap) => mergedMap
-   * @param  {Object} customMap { 'ka' : '?' }
+   * @param  {Object} customMap { 'ka' : 'な' }
    * @return {Function} (defaultMap) => defaultMergedWithCustomMap
    * @example
-   * const sillyMap = createCustomMapping({ '??': 'time', '?': 'cookie' });
+   * const sillyMap = createCustomMapping({ 'ちゃ': 'time', '茎': 'cookie'　});
    * // sillyMap is passed defaultMapping to merge with when called in toRomaji()
-   * toRomaji("It's ? ?? ?", { customRomajiMapping: sillyMap });
+   * toRomaji("It's 茎 ちゃ よ", { customRomajiMapping: sillyMap });
    * // => 'It's cookie time yo';
    */
   function createCustomMapping() {
@@ -5875,68 +5875,68 @@
       : createCustomMapping(customMapping)(map);
   }
 
-  // NOTE: not exactly kunrei shiki, for example ?? -> dya instead of zya, to avoid name clashing
+  // NOTE: not exactly kunrei shiki, for example ぢゃ -> dya instead of zya, to avoid name clashing
   /* eslint-disable */
   // prettier-ignore
   var BASIC_KUNREI = {
-  a: '?', i: '?', u: '?', e: '?', o: '?',
-  k: { a: '?', i: '?', u: '?', e: '?', o: '?' },
-  s: { a: '?', i: '?', u: '?', e: '?', o: '?' },
-  t: { a: '?', i: '?', u: '?', e: '?', o: '?' },
-  n: { a: '?', i: '?', u: '?', e: '?', o: '?' },
-  h: { a: '?', i: '?', u: '?', e: '?', o: '?' },
-  m: { a: '?', i: '?', u: '?', e: '?', o: '?' },
-  y: { a: '?', u: '?', o: '?' },
-  r: { a: '?', i: '?', u: '?', e: '?', o: '?' },
-  w: { a: '?', i: '?', e: '?', o: '?' },
-  g: { a: '?', i: '?', u: '?', e: '?', o: '?' },
-  z: { a: '?', i: '?', u: '?', e: '?', o: '?' },
-  d: { a: '?', i: '?', u: '?', e: '?', o: '?' },
-  b: { a: '?', i: '?', u: '?', e: '?', o: '?' },
-  p: { a: '?', i: '?', u: '?', e: '?', o: '?' },
-  v: { a: '??', i: '??', u: '?', e: '??', o: '??' }
+  a: 'あ', i: 'い', u: 'う', e: 'え', o: 'お',
+  k: { a: 'か', i: 'き', u: 'く', e: 'け', o: 'こ' },
+  s: { a: 'さ', i: 'し', u: 'す', e: 'せ', o: 'そ' },
+  t: { a: 'た', i: 'ち', u: 'つ', e: 'て', o: 'と' },
+  n: { a: 'な', i: 'に', u: 'ぬ', e: 'ね', o: 'の' },
+  h: { a: 'は', i: 'ひ', u: 'ふ', e: 'へ', o: 'ほ' },
+  m: { a: 'ま', i: 'み', u: 'む', e: 'め', o: 'も' },
+  y: { a: 'や', u: 'ゆ', o: 'よ' },
+  r: { a: 'ら', i: 'り', u: 'る', e: 'れ', o: 'ろ' },
+  w: { a: 'わ', i: 'ゐ', e: 'ゑ', o: 'を' },
+  g: { a: 'が', i: 'ぎ', u: 'ぐ', e: 'げ', o: 'ご' },
+  z: { a: 'ざ', i: 'じ', u: 'ず', e: 'ぜ', o: 'ぞ' },
+  d: { a: 'だ', i: 'ぢ', u: 'づ', e: 'で', o: 'ど' },
+  b: { a: 'ば', i: 'び', u: 'ぶ', e: 'べ', o: 'ぼ' },
+  p: { a: 'ぱ', i: 'ぴ', u: 'ぷ', e: 'ぺ', o: 'ぽ' },
+  v: { a: 'ゔぁ', i: 'ゔぃ', u: 'ゔ', e: 'ゔぇ', o: 'ゔぉ' }
 };
 
   var SPECIAL_SYMBOLS = {
-    '.': '?',
-    ',': '?',
-    ':': ':',
-    '/': '�',
-    '!': '!',
-    '?': '?',
-    '~': '?',
-    '-': '?',
-    '�': '?',
-    '�': '?',
-    '�': '?',
-    '�': '?',
-    '[': '[',
-    ']': ']',
-    '(': '(',
-    ')': ')',
-    '{': '{',
-    '}': '}',
+    '.': '。',
+    ',': '、',
+    ':': '：',
+    '/': '・',
+    '!': '！',
+    '?': '？',
+    '~': '〜',
+    '-': 'ー',
+    '‘': '「',
+    '’': '」',
+    '“': '『',
+    '”': '』',
+    '[': '［',
+    ']': '］',
+    '(': '（',
+    ')': '）',
+    '{': '｛',
+    '}': '｝',
   };
 
   var CONSONANTS = {
-    k: '?',
-    s: '?',
-    t: '?',
-    n: '?',
-    h: '?',
-    m: '?',
-    r: '?',
-    g: '?',
-    z: '?',
-    d: '?',
-    b: '?',
-    p: '?',
-    v: '?',
-    q: '?',
-    f: '?',
+    k: 'き',
+    s: 'し',
+    t: 'ち',
+    n: 'に',
+    h: 'ひ',
+    m: 'み',
+    r: 'り',
+    g: 'ぎ',
+    z: 'じ',
+    d: 'ぢ',
+    b: 'び',
+    p: 'ぴ',
+    v: 'ゔ',
+    q: 'く',
+    f: 'ふ',
   };
-  var SMALL_Y = { ya: '?', yi: '?', yu: '?', ye: '?', yo: '?' };
-  var SMALL_VOWELS = { a: '?', i: '?', u: '?', e: '?', o: '?' };
+  var SMALL_Y = { ya: 'ゃ', yi: 'ぃ', yu: 'ゅ', ye: 'ぇ', yo: 'ょ' };
+  var SMALL_VOWELS = { a: 'ぁ', i: 'ぃ', u: 'ぅ', e: 'ぇ', o: 'ぉ' };
 
   // typing one should be the same as having typed the other instead
   var ALIASES = {
@@ -5956,13 +5956,13 @@
     fu: 'hu',
   };
 
-  // xtu -> ?
+  // xtu -> っ
   var SMALL_LETTERS = Object.assign(
     {
-      tu: '?',
-      wa: '?',
-      ka: '?',
-      ke: '?',
+      tu: 'っ',
+      wa: 'ゎ',
+      ka: 'ヵ',
+      ke: 'ヶ',
     },
     SMALL_VOWELS,
     SMALL_Y
@@ -5970,36 +5970,36 @@
 
   // don't follow any notable patterns
   var SPECIAL_CASES = {
-    yi: '?',
-    wu: '?',
-    ye: '??',
-    wi: '??',
-    we: '??',
-    kwa: '??',
-    whu: '?',
-    // because it's not thya for ?? but tha
-    // and tha is not ??, but ??
-    tha: '??',
-    thu: '??',
-    tho: '??',
-    dha: '??',
-    dhu: '??',
-    dho: '??',
+    yi: 'い',
+    wu: 'う',
+    ye: 'いぇ',
+    wi: 'うぃ',
+    we: 'うぇ',
+    kwa: 'くぁ',
+    whu: 'う',
+    // because it's not thya for てゃ but tha
+    // and tha is not てぁ, but てゃ
+    tha: 'てゃ',
+    thu: 'てゅ',
+    tho: 'てょ',
+    dha: 'でゃ',
+    dhu: 'でゅ',
+    dho: 'でょ',
   };
 
   var AIUEO_CONSTRUCTIONS = {
-    wh: '?',
-    qw: '?',
-    q: '?',
-    gw: '?',
-    sw: '?',
-    ts: '?',
-    th: '?',
-    tw: '?',
-    dh: '?',
-    dw: '?',
-    fw: '?',
-    f: '?',
+    wh: 'う',
+    qw: 'く',
+    q: 'く',
+    gw: 'ぐ',
+    sw: 'す',
+    ts: 'つ',
+    th: 'て',
+    tw: 'と',
+    dh: 'で',
+    dw: 'ど',
+    fw: 'ふ',
+    f: 'ふ',
   };
 
   /* eslint-enable */
@@ -6021,7 +6021,7 @@
           roma = _ref4[0],
           kana = _ref4[1];
 
-        // for example kyo -> ? + ?
+        // for example kyo -> き + ょ
         subtreeOf(consonant + roma)[''] = yKana + kana;
       });
     });
@@ -6034,7 +6034,7 @@
       subtreeOf(symbol)[''] = jsymbol;
     });
 
-    // things like ??, ??, etc.
+    // things like うぃ, くぃ, etc.
     Object.entries(AIUEO_CONSTRUCTIONS).forEach((_ref7) => {
       let _ref8 = slicedToArray(_ref7, 2),
         consonant = _ref8[0],
@@ -6050,9 +6050,9 @@
       });
     });
 
-    // different ways to write ?
+    // different ways to write ん
     ['n', "n'", 'xn'].forEach((nChar) => {
-      subtreeOf(nChar)[''] = '?';
+      subtreeOf(nChar)[''] = 'ん';
     });
 
     // c is equivalent to k, but not for chi, cha, etc. that's why we have to make a copy of k
@@ -6097,11 +6097,11 @@
       const xSubtree = subtreeOf(xRoma);
       xSubtree[''] = kana;
 
-      // ltu -> xtu -> ?
+      // ltu -> xtu -> っ
       const parentTree = subtreeOf(`l${allExceptLast(kunreiRoma)}`);
       parentTree[last(kunreiRoma)] = xSubtree;
 
-      // ltsu -> ltu -> ?
+      // ltsu -> ltu -> っ
       getAlternatives(kunreiRoma).forEach((altRoma) => {
         ['l', 'x'].forEach((prefix) => {
           const altParentTree = subtreeOf(prefix + allExceptLast(altRoma));
@@ -6142,7 +6142,7 @@
         const subtree = kanaTree[consonant];
         subtree[consonant] = addTsu(subtree);
       });
-    // nn should not be ??
+    // nn should not be っん
     delete kanaTree.n.n;
     // solidify the results, so that there there is referential transparency within the tree
     return Object.freeze(JSON.parse(JSON.stringify(kanaTree)));
@@ -6157,13 +6157,13 @@
     return romajiToKanaMap;
   }
 
-  const USE_OBSOLETE_KANA_MAP = createCustomMapping({ wi: '?', we: '?' });
+  const USE_OBSOLETE_KANA_MAP = createCustomMapping({ wi: 'ゐ', we: 'ゑ' });
 
   function IME_MODE_MAP(map) {
     // in IME mode, we do not want to convert single ns
     const mapCopy = JSON.parse(JSON.stringify(map));
-    mapCopy.n.n = { '': '?' };
-    mapCopy.n[' '] = { '': '?' };
+    mapCopy.n.n = { '': 'ん' };
+    mapCopy.n[' '] = { '': 'ん' };
     return mapCopy;
   }
 
@@ -6180,7 +6180,7 @@
   }
 
   /**
-   * Returns true if char is '?'
+   * Returns true if char is 'ー'
    * @param  {String} char to test
    * @return {Boolean}
    */
@@ -6192,9 +6192,9 @@
   }
 
   /**
-   * Tests if char is '�'
+   * Tests if char is '・'
    * @param  {String} char
-   * @return {Boolean} true if '�'
+   * @return {Boolean} true if '・'
    */
   function isCharSlashDot() {
     const char = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
@@ -6223,17 +6223,17 @@
    * @param  {String} [input=''] text input
    * @return {String} converted text
    * @example
-   * hiraganaToKatakana('????')
-   * // => "????"
-   * hiraganaToKatakana('???? is a type of kana')
-   * // => "???? is a type of kana"
+   * hiraganaToKatakana('ひらがな')
+   * // => "ヒラガナ"
+   * hiraganaToKatakana('ひらがな is a type of kana')
+   * // => "ヒラガナ is a type of kana"
    */
   function hiraganaToKatakana() {
     const input = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
 
     const kata = [];
     input.split('').forEach((char) => {
-      // Short circuit to avoid incorrect codeshift for '?' and '�'
+      // Short circuit to avoid incorrect codeshift for 'ー' and '・'
       if (isCharLongDash(char) || isCharSlashDot(char)) {
         kata.push(char);
       } else if (isCharHiragana(char)) {
@@ -6256,19 +6256,19 @@
    * @return {String} converted text
    * @example
    * toKana('onaji BUTTSUUJI')
-   * // => '??? ?????'
+   * // => 'おなじ ブッツウジ'
    * toKana('ONAJI buttsuuji')
-   * // => '??? ?????'
-   * toKana('??�zazen�????')
-   * // => '???????????'
+   * // => 'オナジ ぶっつうじ'
+   * toKana('座禅‘zazen’スタイル')
+   * // => '座禅「ざぜん」スタイル'
    * toKana('batsuge-mu')
-   * // => '?????'
-   * toKana('!?.:/,~-����[](){}') // Punctuation conversion
-   * // => '!??:�???????[](){}'
+   * // => 'ばつげーむ'
+   * toKana('!?.:/,~-‘’“”[](){}') // Punctuation conversion
+   * // => '！？。：・、〜ー「」『』［］（）｛｝'
    * toKana('we', { useObsoleteKana: true })
-   * // => '?'
-   * toKana('wanakana', { customKanaMapping: { na: '?', ka: 'bana' } });
-   * // => '??bana?'
+   * // => 'ゑ'
+   * toKana('wanakana', { customKanaMapping: { na: 'に', ka: 'bana' } });
+   * // => 'わにbanaに'
    */
   function toKana() {
     const input = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
@@ -6313,7 +6313,7 @@
    * @returns {Array[]} [[start, end, token]]
    * @example
    * splitIntoConvertedKana('buttsuuji')
-   * // => [[0, 2, '?'], [2, 6, '??'], [6, 7, '?'], [7, 9, '?']]
+   * // => [[0, 2, 'ぶ'], [2, 6, 'っつ'], [6, 7, 'う'], [7, 9, 'じ']]
    */
   function splitIntoConvertedKana() {
     const input = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
@@ -6440,9 +6440,9 @@
   }
 
   // so we can handle non-terminal inserted input conversion:
-  // | -> ?| -> ??| -> ?|? -> ?s|? -> ?sh|? -> ?shi|? -> ??|?
+  // | -> わ| -> わび| -> わ|び -> わs|び -> わsh|び -> わshi|び -> わし|び
   // or multiple ambiguous positioning (IE select which "s" to work from)
-  // ?s?s|?s? -> ?s?so|?s? -> ?s??|?s?
+  // こsこs|こsこ -> こsこso|こsこ -> こsこそ|こsこ
   function splitInput() {
     const text = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
     const cursor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
@@ -6694,17 +6694,17 @@
    * @param  {Regexp} [allowed] additional test allowed to pass for each char
    * @return {Boolean} true if [Romaji](https://en.wikipedia.org/wiki/Romaji)
    * @example
-   * isRomaji('Tokyo and Osaka')
+   * isRomaji('Tōkyō and Ōsaka')
    * // => true
    * isRomaji('12a*b&c-d')
    * // => true
-   * isRomaji('??A')
+   * isRomaji('あアA')
    * // => false
-   * isRomaji('???')
+   * isRomaji('お願い')
    * // => false
-   * isRomaji('a!b&c?d') // Zenkaku punctuation fails
+   * isRomaji('a！b&cーd') // Zenkaku punctuation fails
    * // => false
-   * isRomaji('a!b&c?d', /[!?]/)
+   * isRomaji('a！b&cーd', /[！ー]/)
    * // => true
    */
   function isRomaji() {
@@ -6748,15 +6748,15 @@
    * @param  {String} [input=''] text
    * @return {Boolean} true if all [Kana](https://en.wikipedia.org/wiki/Kana)
    * @example
-   * isKana('?')
+   * isKana('あ')
    * // => true
-   * isKana('?')
+   * isKana('ア')
    * // => true
-   * isKana('???')
+   * isKana('あーア')
    * // => true
    * isKana('A')
    * // => false
-   * isKana('?A?')
+   * isKana('あAア')
    * // => false
    */
   function isKana() {
@@ -6771,11 +6771,11 @@
    * @param  {String} [input=''] text
    * @return {Boolean} true if all [Hiragana](https://en.wikipedia.org/wiki/Hiragana)
    * @example
-   * isHiragana('???')
+   * isHiragana('げーむ')
    * // => true
    * isHiragana('A')
    * // => false
-   * isHiragana('??')
+   * isHiragana('あア')
    * // => false
    */
   function isHiragana() {
@@ -6790,13 +6790,13 @@
    * @param  {String} [input=''] text
    * @return {Boolean} true if all [Katakana](https://en.wikipedia.org/wiki/Katakana)
    * @example
-   * isKatakana('???')
+   * isKatakana('ゲーム')
    * // => true
-   * isKatakana('?')
+   * isKatakana('あ')
    * // => false
    * isKatakana('A')
    * // => false
-   * isKatakana('??')
+   * isKatakana('あア')
    * // => false
    */
   function isKatakana() {
@@ -6822,15 +6822,15 @@
    * @param  {String} [input=''] text
    * @return {Boolean} true if all [Kanji](https://en.wikipedia.org/wiki/Kanji)
    * @example
-   * isKanji('?')
+   * isKanji('刀')
    * // => true
-   * isKanji('??')
+   * isKanji('切腹')
    * // => true
-   * isKanji('??')
+   * isKanji('勢い')
    * // => false
-   * isKanji('?A?')
+   * isKanji('あAア')
    * // => false
-   * isKanji('??')
+   * isKanji('🐸')
    * // => false
    */
   function isKanji() {
@@ -6846,15 +6846,15 @@
    * @param  {Object} [options={ passKanji: true }] optional config to pass through kanji
    * @return {Boolean} true if mixed
    * @example
-   * isMixed('Ab??'))
+   * isMixed('Abあア'))
    * // => true
-   * isMixed('??A')) // ignores kanji by default
+   * isMixed('お腹A')) // ignores kanji by default
    * // => true
-   * isMixed('??A', { passKanji: false }))
+   * isMixed('お腹A', { passKanji: false }))
    * // => false
    * isMixed('ab'))
    * // => false
-   * isMixed('??'))
+   * isMixed('あア'))
    * // => false
    */
   function isMixed() {
@@ -6877,14 +6877,14 @@
     return isCharLongDash(char) && index > 0;
   };
   const isKanaAsSymbol = function isKanaAsSymbol(char) {
-    return ['?', '?'].includes(char);
+    return ['ヶ', 'ヵ'].includes(char);
   };
   const LONG_VOWELS = {
-    a: '?',
-    i: '?',
-    u: '?',
-    e: '?',
-    o: '?',
+    a: 'あ',
+    i: 'い',
+    u: 'う',
+    e: 'え',
+    o: 'う',
   };
 
   // inject toRomaji to avoid circular dependency between toRomaji <-> katakanaToHiragana
@@ -6898,16 +6898,16 @@
     return input
       .split('')
       .reduce((hira, char, index) => {
-        // Short circuit to avoid incorrect codeshift for '?' and '�'
+        // Short circuit to avoid incorrect codeshift for 'ー' and '・'
         if (isCharSlashDot(char) || isCharInitialLongDash(char, index) || isKanaAsSymbol(char)) {
           return hira.concat(char);
-          // Transform long vowels: '??' to '??'
+          // Transform long vowels: 'オー' to 'おう'
         } else if (previousKana && isCharInnerLongDash(char, index)) {
           // Transform previousKana back to romaji, and slice off the vowel
           const romaji = toRomaji(previousKana).slice(-1);
-          // However, ensure '??' => '??' => 'oo' if this is a transform on the way to romaji
+          // However, ensure 'オー' => 'おお' => 'oo' if this is a transform on the way to romaji
           if (isCharKatakana(input[index - 1]) && romaji === 'o' && isDestinationRomaji) {
-            return hira.concat('?');
+            return hira.concat('お');
           }
           return hira.concat(LONG_VOWELS[romaji]);
         } else if (!isCharLongDash(char) && isCharKatakana(char)) {
@@ -6929,79 +6929,79 @@
   /* eslint-disable */
   // prettier-ignore
   var BASIC_ROMAJI = {
-  ?: 'a', ?: 'i', ?: 'u', ?: 'e', ?: 'o',
-  ?: 'ka', ?: 'ki', ?: 'ku', ?: 'ke', ?: 'ko',
-  ?: 'sa', ?: 'shi', ?: 'su', ?: 'se', ?: 'so',
-  ?: 'ta', ?: 'chi', ?: 'tsu', ?: 'te', ?: 'to',
-  ?: 'na', ?: 'ni', ?: 'nu', ?: 'ne', ?: 'no',
-  ?: 'ha', ?: 'hi', ?: 'fu', ?: 'he', ?: 'ho',
-  ?: 'ma', ?: 'mi', ?: 'mu', ?: 'me', ?: 'mo',
-  ?: 'ra', ?: 'ri', ?: 'ru', ?: 're', ?: 'ro',
-  ?: 'ya', ?: 'yu', ?: 'yo',
-  ?: 'wa', ?: 'wi', ?: 'we', ?: 'wo',
-  ?: 'n',
-  ?: 'ga', ?: 'gi', ?: 'gu', ?: 'ge', ?: 'go',
-  ?: 'za', ?: 'ji', ?: 'zu', ?: 'ze', ?: 'zo',
-  ?: 'da', ?: 'ji', ?: 'zu', ?: 'de', ?: 'do',
-  ?: 'ba', ?: 'bi', ?: 'bu', ?: 'be', ?: 'bo',
-  ?: 'pa', ?: 'pi', ?: 'pu', ?: 'pe', ?: 'po',
-  ??: 'va', ??: 'vi', ?: 'vu', ??: 've', ??: 'vo'
+  あ: 'a', い: 'i', う: 'u', え: 'e', お: 'o',
+  か: 'ka', き: 'ki', く: 'ku', け: 'ke', こ: 'ko',
+  さ: 'sa', し: 'shi', す: 'su', せ: 'se', そ: 'so',
+  た: 'ta', ち: 'chi', つ: 'tsu', て: 'te', と: 'to',
+  な: 'na', に: 'ni', ぬ: 'nu', ね: 'ne', の: 'no',
+  は: 'ha', ひ: 'hi', ふ: 'fu', へ: 'he', ほ: 'ho',
+  ま: 'ma', み: 'mi', む: 'mu', め: 'me', も: 'mo',
+  ら: 'ra', り: 'ri', る: 'ru', れ: 're', ろ: 'ro',
+  や: 'ya', ゆ: 'yu', よ: 'yo',
+  わ: 'wa', ゐ: 'wi', ゑ: 'we', を: 'wo',
+  ん: 'n',
+  が: 'ga', ぎ: 'gi', ぐ: 'gu', げ: 'ge', ご: 'go',
+  ざ: 'za', じ: 'ji', ず: 'zu', ぜ: 'ze', ぞ: 'zo',
+  だ: 'da', ぢ: 'ji', づ: 'zu', で: 'de', ど: 'do',
+  ば: 'ba', び: 'bi', ぶ: 'bu', べ: 'be', ぼ: 'bo',
+  ぱ: 'pa', ぴ: 'pi', ぷ: 'pu', ぺ: 'pe', ぽ: 'po',
+  ゔぁ: 'va', ゔぃ: 'vi', ゔ: 'vu', ゔぇ: 've', ゔぉ: 'vo'
 };
   /* eslint-enable  */
 
   const SPECIAL_SYMBOLS$1 = {
-    '?': '.',
-    '?': ',',
-    ':': ':',
-    '�': '/',
-    '!': '!',
-    '?': '?',
-    '?': '~',
-    '?': '-',
-    '?': '�',
-    '?': '�',
-    '?': '�',
-    '?': '�',
-    '[': '[',
-    ']': ']',
-    '(': '(',
-    ')': ')',
-    '{': '{',
-    '}': '}',
-    ' ': ' ',
+    '。': '.',
+    '、': ',',
+    '：': ':',
+    '・': '/',
+    '！': '!',
+    '？': '?',
+    '〜': '~',
+    'ー': '-',
+    '「': '‘',
+    '」': '’',
+    '『': '“',
+    '』': '”',
+    '［': '[',
+    '］': ']',
+    '（': '(',
+    '）': ')',
+    '｛': '{',
+    '｝': '}',
+    '　': ' ',
   };
 
-  // ?? -> n'i
-  const AMBIGUOUS_VOWELS = ['?', '?', '?', '?', '?', '?', '?', '?'];
-  const SMALL_Y$1 = { ?: 'ya', ?: 'yu', ?: 'yo' };
-  const SMALL_Y_EXTRA = { ?: 'yi', ?: 'ye' };
+  // んい -> n'i
+  const AMBIGUOUS_VOWELS = ['あ', 'い', 'う', 'え', 'お', 'や', 'ゆ', 'よ'];
+  const SMALL_Y$1 = { ゃ: 'ya', ゅ: 'yu', ょ: 'yo' };
+  const SMALL_Y_EXTRA = { ぃ: 'yi', ぇ: 'ye' };
   const SMALL_AIUEO = {
-    ?: 'a',
-    ?: 'i',
-    ?: 'u',
-    ?: 'e',
-    ?: 'o',
+    ぁ: 'a',
+    ぃ: 'i',
+    ぅ: 'u',
+    ぇ: 'e',
+    ぉ: 'o',
   };
-  const YOON_KANA = ['?', '?', '?', '?', '?', '?', '?', '?', '?', '?', '?'];
+  const YOON_KANA = ['き', 'に', 'ひ', 'み', 'り', 'ぎ', 'び', 'ぴ', 'ゔ', 'く', 'ふ'];
   const YOON_EXCEPTIONS = {
-    ?: 'sh',
-    ?: 'ch',
-    ?: 'j',
-    ?: 'j',
+    し: 'sh',
+    ち: 'ch',
+    じ: 'j',
+    ぢ: 'j',
   };
   const SMALL_KANA = {
-    ?: '',
-    ?: 'ya',
-    ?: 'yu',
-    ?: 'yo',
-    ?: 'a',
-    ?: 'i',
-    ?: 'u',
-    ?: 'e',
-    ?: 'o',
+    っ: '',
+    ゃ: 'ya',
+    ゅ: 'yu',
+    ょ: 'yo',
+    ぁ: 'a',
+    ぃ: 'i',
+    ぅ: 'u',
+    ぇ: 'e',
+    ぉ: 'o',
   };
 
-  // going with the intuitive (yet incorrect) solution where ?? -> yya and ?? -> ii
+  // going with the intuitive (yet incorrect) solution where っや -> yya and っぃ -> ii
   // in other words, just assume the sokuon could have been applied to anything
   const SOKUON_WHITELIST = {
     b: 'b',
@@ -7071,7 +7071,7 @@
         setTrans(roma, kana);
       });
 
-    // ?? -> kya
+    // きゃ -> kya
     YOON_KANA.forEach((kana) => {
       const firstRomajiChar = subtreeOf(kana)[''][0];
       Object.entries(SMALL_Y$1).forEach((_ref5) => {
@@ -7081,7 +7081,7 @@
 
         setTrans(kana + yKana, firstRomajiChar + yRoma);
       });
-      // ?? -> kyi
+      // きぃ -> kyi
       Object.entries(SMALL_Y_EXTRA).forEach((_ref7) => {
         let _ref8 = slicedToArray(_ref7, 2),
           yKana = _ref8[0],
@@ -7096,7 +7096,7 @@
         kana = _ref10[0],
         roma = _ref10[1];
 
-      // ?? -> ja
+      // じゃ -> ja
       Object.entries(SMALL_Y$1).forEach((_ref11) => {
         let _ref12 = slicedToArray(_ref11, 2),
           yKana = _ref12[0],
@@ -7104,12 +7104,12 @@
 
         setTrans(kana + yKana, roma + yRoma[1]);
       });
-      // ?? -> jyi, ?? -> je
+      // じぃ -> jyi, じぇ -> je
       setTrans(`${kana}\u3043`, `${roma}yi`);
       setTrans(`${kana}\u3047`, `${roma}e`);
     });
 
-    romajiTree['?'] = resolveTsu(romajiTree);
+    romajiTree['っ'] = resolveTsu(romajiTree);
 
     Object.entries(SMALL_KANA).forEach((_ref13) => {
       let _ref14 = slicedToArray(_ref13, 2),
@@ -7124,14 +7124,14 @@
     });
 
     // NOTE: could be re-enabled with an option?
-    // // ?? -> mbo
+    // // んば -> mbo
     // const LABIAL = [
-    //   '?', '?', '?', '?', '?',
-    //   '?', '?', '?', '?', '?',
-    //   '?', '?', '?', '?', '?',
+    //   'ば', 'び', 'ぶ', 'べ', 'ぼ',
+    //   'ぱ', 'ぴ', 'ぷ', 'ぺ', 'ぽ',
+    //   'ま', 'み', 'む', 'め', 'も',
     // ];
     // LABIAL.forEach((kana) => {
-    //   setTrans(`?${kana}`, `m${subtreeOf(kana)['']}`);
+    //   setTrans(`ん${kana}`, `m${subtreeOf(kana)['']}`);
     // });
 
     return Object.freeze(JSON.parse(JSON.stringify(romajiTree)));
@@ -7163,13 +7163,13 @@
    * @param  {DefaultOptions} [options=defaultOptions]
    * @return {String} converted text
    * @example
-   * toRomaji('???? ????')
+   * toRomaji('ひらがな　カタカナ')
    * // => 'hiragana katakana'
-   * toRomaji('??? ???')
+   * toRomaji('げーむ　ゲーム')
    * // => 'ge-mu geemu'
-   * toRomaji('???? ????', { upcaseKatakana: true })
+   * toRomaji('ひらがな　カタカナ', { upcaseKatakana: true })
    * // => 'hiragana KATAKANA'
-   * toRomaji('????', { customRomajiMapping: { ?: 'zi', ?: 'tu', ?: 'li' } });
+   * toRomaji('つじぎり', { customRomajiMapping: { じ: 'zi', つ: 'tu', り: 'li' } });
    * // => 'tuzigili'
    */
   function toRomaji() {
@@ -7229,14 +7229,14 @@
    * @param  {DefaultOptions} [options=defaultOptions]
    * @return {String} converted text
    * @example
-   * toHiragana('toukyou, ????')
-   * // => '?????? ????'
-   * toHiragana('only ??', { passRomaji: true })
-   * // => 'only ??'
+   * toHiragana('toukyou, オオサカ')
+   * // => 'とうきょう、　おおさか'
+   * toHiragana('only カナ', { passRomaji: true })
+   * // => 'only かな'
    * toHiragana('wi')
-   * // => '??'
+   * // => 'うぃ'
    * toHiragana('wi', { useObsoleteKana: true })
-   * // => '?'
+   * // => 'ゐ'
    */
   function toHiragana() {
     const input = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
@@ -7265,14 +7265,14 @@
    * @param  {DefaultOptions} [options=defaultOptions]
    * @return {String} converted text
    * @example
-   * toKatakana('toukyou, ????')
-   * // => '?????? ????'
-   * toKatakana('only ??', { passRomaji: true })
-   * // => 'only ??'
+   * toKatakana('toukyou, おおさか')
+   * // => 'トウキョウ、　オオサカ'
+   * toKatakana('only かな', { passRomaji: true })
+   * // => 'only カナ'
    * toKatakana('wi')
-   * // => '??'
+   * // => 'ウィ'
    * toKatakana('wi', { useObsoleteKana: true })
-   * // => '?'
+   * // => 'ヰ'
    */
   function toKatakana() {
     const input = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
@@ -7327,16 +7327,16 @@
    * @param  {Object} [options={ all: false }] config object specifying if *all* kana should be removed, not just trailing okurigana
    * @return {String} text with okurigana removed
    * @example
-   * stripOkurigana('????')
-   * // => '???'
-   * stripOkurigana('???')
-   * // => '??'
-   * stripOkurigana('???')
-   * // => '??'
-   * stripOkurigana('????', { all: true })
-   * // => '??'
-   * stripOkurigana('???', { all: true })
-   * // => '?'
+   * stripOkurigana('踏み込む')
+   * // => '踏み込'
+   * stripOkurigana('粘り。')
+   * // => '粘。'
+   * stripOkurigana('お祝い')
+   * // => 'お祝'
+   * stripOkurigana('踏み込む', { all: true })
+   * // => '踏込'
+   * stripOkurigana('お祝い', { all: true })
+   * // => '祝'
    */
   function stripOkurigana() {
     const input = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
@@ -7374,10 +7374,10 @@
     return x === ' ';
   };
   const isCharJaSpace = function isCharJaSpace(x) {
-    return x === ' ';
+    return x === '　';
   };
   const isCharJaNum = function isCharJaNum(x) {
-    return /[0-9]/.test(x);
+    return /[０-９]/.test(x);
   };
   const isCharEnNum = function isCharEnNum(x) {
     return /[0-9]/.test(x);
@@ -7473,55 +7473,55 @@
    * @param  {Object} [options={ compact: false, detailed: false}] options to modify output style
    * @return {String|Object[]} text split into tokens containing values, or detailed object
    * @example
-   * tokenize('????')
-   * // ['??', '??']
+   * tokenize('ふふフフ')
+   * // ['ふふ', 'フフ']
    *
-   * tokenize('??')
-   * // ['?', '?']
+   * tokenize('感じ')
+   * // ['感', 'じ']
    *
-   * tokenize('truly ?????')
-   * // ['truly', ' ', '?', '?', '?', '??']
+   * tokenize('truly 私は悲しい')
+   * // ['truly', ' ', '私', 'は', '悲', 'しい']
    *
-   * tokenize('truly ?????', { compact: true })
-   * // ['truly ', '?????']
+   * tokenize('truly 私は悲しい', { compact: true })
+   * // ['truly ', '私は悲しい']
    *
-   * tokenize('5romaji here...!???????4?? ???SHIO??!')
-   * // [ '5', 'romaji', ' ', 'here', '...!?', '??', '????', '??', ' ', '??', '4', '?', 'SHIO', '??!']
+   * tokenize('5romaji here...!?漢字ひらがな４カタ　カナ「ＳＨＩＯ」。！')
+   * // [ '5', 'romaji', ' ', 'here', '...!?', '漢字', 'ひらがな', 'カタ', '　', 'カナ', '４', '「', 'ＳＨＩＯ', '」。！']
    *
-   * tokenize('5romaji here...!???????4?? ???SHIO??!', { compact: true })
-   * // [ '5', 'romaji here', '...!?', '???????? ??', '4?', 'SHIO', '??!']
+   * tokenize('5romaji here...!?漢字ひらがな４カタ　カナ「ＳＨＩＯ」。！', { compact: true })
+   * // [ '5', 'romaji here', '...!?', '漢字ひらがなカタ　カナ', '４「', 'ＳＨＩＯ', '」。！']
    *
-   * tokenize('5romaji here...!????????? ??4?SHIO??! ?????', { detailed: true })
+   * tokenize('5romaji here...!?漢字ひらがなカタ　カナ４「ＳＨＩＯ」。！ لنذهب', { detailed: true })
    * // [
    *  { type: 'englishNumeral', value: '5' },
    *  { type: 'en', value: 'romaji' },
    *  { type: 'space', value: ' ' },
    *  { type: 'en', value: 'here' },
    *  { type: 'englishPunctuation', value: '...!?' },
-   *  { type: 'kanji', value: '??' },
-   *  { type: 'hiragana', value: '????' },
-   *  { type: 'katakana', value: '??' },
+   *  { type: 'kanji', value: '漢字' },
+   *  { type: 'hiragana', value: 'ひらがな' },
+   *  { type: 'katakana', value: 'カタ' },
+   *  { type: 'space', value: '　' },
+   *  { type: 'katakana', value: 'カナ' },
+   *  { type: 'japaneseNumeral', value: '４' },
+   *  { type: 'japanesePunctuation', value: '「' },
+   *  { type: 'ja', value: 'ＳＨＩＯ' },
+   *  { type: 'japanesePunctuation', value: '」。！' },
    *  { type: 'space', value: ' ' },
-   *  { type: 'katakana', value: '??' },
-   *  { type: 'japaneseNumeral', value: '4' },
-   *  { type: 'japanesePunctuation', value: '?' },
-   *  { type: 'ja', value: 'SHIO' },
-   *  { type: 'japanesePunctuation', value: '??!' },
-   *  { type: 'space', value: ' ' },
-   *  { type: 'other', value: '?????' },
+   *  { type: 'other', value: 'لنذهب' },
    * ]
    *
-   * tokenize('5romaji here...!????????? ??4?SHIO??! ?????', { compact: true, detailed: true})
+   * tokenize('5romaji here...!?漢字ひらがなカタ　カナ４「ＳＨＩＯ」。！ لنذهب', { compact: true, detailed: true})
    * // [
    *  { type: 'other', value: '5' },
    *  { type: 'en', value: 'romaji here' },
    *  { type: 'other', value: '...!?' },
-   *  { type: 'ja', value: '???????? ??' },
-   *  { type: 'other', value: '4?' },
-   *  { type: 'ja', value: 'SHIO' },
-   *  { type: 'other', value: '??!' },
+   *  { type: 'ja', value: '漢字ひらがなカタ　カナ' },
+   *  { type: 'other', value: '４「' },
+   *  { type: 'ja', value: 'ＳＨＩＯ' },
+   *  { type: 'other', value: '」。！' },
    *  { type: 'en', value: ' ' },
-   *  { type: 'other', value: '?????' },
+   *  { type: 'other', value: 'لنذهب' },
    *]
    */
   function tokenize(input) {
